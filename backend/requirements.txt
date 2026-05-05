@@ -1,0 +1,10 @@
+fastapi
+uvicorn
+pydantic
+groq
+pyTigerGraph
+python-dotenv
+tavily-python
+python-multipart
+PyPDF2
+Pillow

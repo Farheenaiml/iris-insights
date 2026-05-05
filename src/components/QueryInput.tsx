@@ -1,9 +1,9 @@
 import { motion } from "framer-motion";
-import { ArrowRight, Loader2, Sparkles } from "lucide-react";
-import { useState, type FormEvent } from "react";
+import { ArrowRight, Loader2, Sparkles, Paperclip, X } from "lucide-react";
+import { useState, useRef, type FormEvent } from "react";
 
 interface Props {
-  onSubmit: (q: string) => void;
+  onSubmit: (q: string, file?: File) => void;
   loading: boolean;
 }
 
@@ -15,11 +15,14 @@ const SUGGESTIONS = [
 
 export default function QueryInput({ onSubmit, loading }: Props) {
   const [value, setValue] = useState("");
+  const [file, setFile] = useState<File | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
-    if (!value.trim() || loading) return;
-    onSubmit(value.trim());
+    if (!value.trim() && !file) return;
+    if (loading) return;
+    onSubmit(value.trim(), file || undefined);
   };
 
   return (
@@ -45,15 +48,41 @@ export default function QueryInput({ onSubmit, loading }: Props) {
         <div className="absolute -inset-px bg-gradient-primary rounded-2xl opacity-0 group-focus-within:opacity-60 blur-md transition-opacity duration-500" />
         <div className="relative glass-strong rounded-2xl p-2 flex items-center gap-2 shadow-card">
           <input
-            value={value}
-            onChange={(e) => setValue(e.target.value)}
-            placeholder="Ask a question…"
-            disabled={loading}
-            className="flex-1 bg-transparent px-4 py-4 text-base outline-none placeholder:text-muted-foreground/70"
+            type="file"
+            ref={fileInputRef}
+            className="hidden"
+            onChange={(e) => setFile(e.target.files?.[0] || null)}
+            accept=".txt,.pdf,image/*"
           />
           <button
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            className="p-3 hover:bg-white/5 rounded-xl transition-colors text-muted-foreground hover:text-foreground"
+            title="Attach File"
+          >
+            <Paperclip className="w-5 h-5" />
+          </button>
+          
+          <div className="flex-1 flex flex-col">
+            {file && (
+              <div className="flex items-center gap-2 px-4 pt-2 pb-1 text-xs text-primary">
+                <span className="truncate max-w-[200px]">{file.name}</span>
+                <button type="button" onClick={() => setFile(null)} className="hover:text-foreground">
+                  <X className="w-3 h-3" />
+                </button>
+              </div>
+            )}
+            <input
+              value={value}
+              onChange={(e) => setValue(e.target.value)}
+              placeholder="Ask a question or describe an image..."
+              disabled={loading}
+              className="w-full bg-transparent px-4 py-2 text-base outline-none placeholder:text-muted-foreground/70"
+            />
+          </div>
+          <button
             type="submit"
-            disabled={loading || !value.trim()}
+            disabled={loading || (!value.trim() && !file)}
             className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-gradient-primary text-primary-foreground font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-glow transition-all duration-300"
           >
             {loading ? (

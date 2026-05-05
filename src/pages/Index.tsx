@@ -7,19 +7,24 @@ import MetricsDashboard from "@/components/MetricsDashboard";
 import QueryInput from "@/components/QueryInput";
 import ReasoningPanel from "@/components/ReasoningPanel";
 import { runComparison, type QueryResponse } from "@/lib/mockApi";
+import { toast } from "sonner";
 
 const Index = () => {
   const [data, setData] = useState<QueryResponse | null>(null);
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
 
-  const handleSubmit = async (q: string) => {
+  const handleSubmit = async (q: string, file?: File) => {
     setLoading(true);
     setSubmitted(true);
     setData(null);
     try {
-      const res = await runComparison(q);
+      const res = await runComparison(q, file);
       setData(res);
+    } catch (error: any) {
+      console.error(error);
+      toast.error(error.message || "Failed to fetch response. Please check your backend.");
+      setSubmitted(false); // Reset submitted state on error so UI doesn't hang on skeletons
     } finally {
       setLoading(false);
     }

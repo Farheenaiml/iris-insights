@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { Clock, Coins, Cpu, Sparkles } from "lucide-react";
+import ReactMarkdown from "react-markdown";
 import type { QueryResponse } from "@/lib/mockApi";
 
 interface Props {
@@ -76,14 +77,26 @@ function Card({
         )}
       </div>
 
-      <div className="h-48 overflow-y-auto pr-2 mb-5 text-sm leading-relaxed text-foreground/90">
-        {loading ? <Skeleton /> : <p>{answer}</p>}
+      <div className="h-48 overflow-y-auto pr-2 mb-5 text-sm leading-relaxed text-foreground/90 prose prose-sm dark:prose-invert">
+        {loading ? (
+          <Skeleton />
+        ) : (
+          <ReactMarkdown
+            components={{
+              a: ({ node, ...props }) => (
+                <a target="_blank" rel="noopener noreferrer" {...props} />
+              ),
+            }}
+          >
+            {answer || ""}
+          </ReactMarkdown>
+        )}
       </div>
 
       <div className="grid grid-cols-3 gap-3 pt-4 border-t border-border">
-        <Metric icon={Cpu} label="Tokens" value={loading ? "—" : tokens!.toLocaleString()} />
-        <Metric icon={Clock} label="Time" value={loading ? "—" : `${(time! / 1000).toFixed(2)}s`} />
-        <Metric icon={Coins} label="Cost" value={loading ? "—" : `$${cost!.toFixed(4)}`} />
+        <Metric icon={Cpu} label="Tokens" value={loading || tokens === undefined ? "—" : tokens.toLocaleString()} />
+        <Metric icon={Clock} label="Time" value={loading || time === undefined ? "—" : `${(time / 1000).toFixed(2)}s`} />
+        <Metric icon={Coins} label="Cost" value={loading || cost === undefined ? "—" : `$${cost.toFixed(4)}`} />
       </div>
     </motion.div>
   );
