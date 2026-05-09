@@ -6,6 +6,13 @@ export interface QueryResponse {
     responseTime: number; // ms
     cost: number; // USD
   };
+  vectorrag: {
+    answer: string;
+    tokens: number;
+    responseTime: number;
+    cost: number;
+    retrievedChunks: number;
+  };
   graphrag: {
     answer: string;
     tokens: number;

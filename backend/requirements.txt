@@ -8,3 +8,7 @@ tavily-python
 python-multipart
 PyPDF2
 Pillow
+faiss-cpu
+sentence-transformers
+numpy
+torch

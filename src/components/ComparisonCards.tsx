@@ -104,7 +104,7 @@ function Card({
 
 export default function ComparisonCards({ data, loading }: Props) {
   return (
-    <div className="grid md:grid-cols-2 gap-6">
+    <div className="grid lg:grid-cols-3 md:grid-cols-2 gap-6">
       <Card
         title="Baseline LLM"
         loading={loading}
@@ -113,6 +113,15 @@ export default function ComparisonCards({ data, loading }: Props) {
         tokens={data?.baseline.tokens}
         time={data?.baseline.responseTime}
         cost={data?.baseline.cost}
+      />
+      <Card
+        title="Vector RAG"
+        loading={loading}
+        loadingLabel="Running Vector RAG…"
+        answer={data?.vectorrag.answer}
+        tokens={data?.vectorrag.tokens}
+        time={data?.vectorrag.responseTime}
+        cost={data?.vectorrag.cost}
       />
       <Card
         title="GraphRAG"

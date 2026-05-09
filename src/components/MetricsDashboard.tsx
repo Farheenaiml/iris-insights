@@ -31,7 +31,7 @@ function Chart({ title, unit, data }: { title: string; unit: string; data: { nam
           />
           <Bar dataKey="value" radius={[8, 8, 0, 0]}>
             {data.map((d, i) => (
-              <Cell key={i} fill={i === 0 ? "hsl(var(--muted-foreground))" : "hsl(var(--primary))"} />
+              <Cell key={i} fill={i === 0 ? "hsl(var(--muted-foreground))" : i === 1 ? "hsl(var(--primary) / 0.6)" : "hsl(var(--primary))"} />
             ))}
           </Bar>
         </BarChart>
@@ -43,14 +43,17 @@ function Chart({ title, unit, data }: { title: string; unit: string; data: { nam
 export default function MetricsDashboard({ data }: Props) {
   const tokens = [
     { name: "Baseline", value: data.baseline.tokens },
+    { name: "VectorRAG", value: data.vectorrag.tokens },
     { name: "GraphRAG", value: data.graphrag.tokens },
   ];
   const time = [
     { name: "Baseline", value: +(data.baseline.responseTime / 1000).toFixed(2) },
+    { name: "VectorRAG", value: +(data.vectorrag.responseTime / 1000).toFixed(2) },
     { name: "GraphRAG", value: +(data.graphrag.responseTime / 1000).toFixed(2) },
   ];
   const cost = [
     { name: "Baseline", value: +(data.baseline.cost * 1000).toFixed(2) },
+    { name: "VectorRAG", value: +(data.vectorrag.cost * 1000).toFixed(2) },
     { name: "GraphRAG", value: +(data.graphrag.cost * 1000).toFixed(2) },
   ];
 

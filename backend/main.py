@@ -10,9 +10,13 @@ from dotenv import load_dotenv
 from groq import Groq
 from tavily import TavilyClient
 import PyPDF2
+from rag import RAGPipeline
 
 # Load environment variables from .env file
 load_dotenv()
+
+# Initialize RAG Pipeline
+rag_pipeline = RAGPipeline(data_dir="../data", index_dir="rag_index")
 
 app = FastAPI()
 
@@ -40,6 +44,13 @@ class BaselineResponse(BaseModel):
     tokens: int
     responseTime: int
     cost: float
+
+class VectorRAGResponse(BaseModel):
+    answer: str
+    tokens: int
+    responseTime: int
+    cost: float
+    retrievedChunks: int
 
 class GraphNode(BaseModel):
     id: str
@@ -70,6 +81,7 @@ class Comparison(BaseModel):
 class QueryResponse(BaseModel):
     query: str
     baseline: BaselineResponse
+    vectorrag: VectorRAGResponse
     graphrag: GraphRAGResponse
     comparison: Comparison
 
@@ -167,7 +179,33 @@ async def handle_query(
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error communicating with Groq: {str(e)}")
 
-    # 2. GraphRAG Pipeline (Dummy for now, to be implemented next)
+    # 2. VectorRAG Pipeline
+    try:
+        if is_image:
+            # Fallback if image
+            vr_answer = "Vector RAG not supported for images directly."
+            vr_tokens = 0
+            vr_time = 0
+            vr_cost = 0.0
+            vr_chunks = 0
+        else:
+            rag_res = rag_pipeline.query(user_query=query, top_k=5)
+            vr_answer = rag_res["answer"]
+            vr_time = rag_res["metrics"]["latency_ms"]
+            p_tokens = rag_res["metrics"]["token_usage"]["prompt_tokens"]
+            c_tokens = rag_res["metrics"]["token_usage"]["completion_tokens"]
+            vr_tokens = p_tokens + c_tokens
+            vr_cost = (p_tokens * 0.05 / 1000000) + (c_tokens * 0.08 / 1000000)
+            vr_chunks = rag_res["metrics"]["retrieved_chunks_count"]
+    except Exception as e:
+        print(f"Vector RAG failed: {e}")
+        vr_answer = f"Vector RAG failed: {str(e)}"
+        vr_tokens = 0
+        vr_time = 0
+        vr_cost = 0.0
+        vr_chunks = 0
+
+    # 3. GraphRAG Pipeline (Dummy for now, to be implemented next)
     # We use some dummy math based on baseline to make the comparison UI work temporarily
     grTokens = int(baseline_tokens * 0.4) if baseline_tokens > 0 else 720
     grTime = int(baseline_time * 0.35) if baseline_time > 0 else 1450
@@ -180,6 +218,13 @@ async def handle_query(
             tokens=baseline_tokens,
             responseTime=baseline_time,
             cost=round(baseline_cost, 6)
+        ),
+        vectorrag=VectorRAGResponse(
+            answer=vr_answer,
+            tokens=vr_tokens,
+            responseTime=vr_time,
+            cost=round(vr_cost, 6),
+            retrievedChunks=vr_chunks
         ),
         graphrag=GraphRAGResponse(
             answer=f"[GraphRAG Placeholder] This will eventually be the enhanced answer for: '{query}' using graph context. The graph approach is currently under construction.",
@@ -207,3 +252,29 @@ async def handle_query(
             costSavedPct=round(((baseline_cost - grCost) / baseline_cost) * 100) if baseline_cost > 0 else 0
         )
     )
+
+class IndexRequest(BaseModel):
+    file_name: str = "dev.txt"
+    max_docs: int = 1000
+
+@app.post("/api/rag/index")
+async def rag_index(req: IndexRequest):
+    try:
+        return rag_pipeline.index_data(file_name=req.file_name, max_docs=req.max_docs)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+class RagQueryRequest(BaseModel):
+    query: str
+    top_k: int = 5
+
+@app.post("/api/rag/query")
+async def rag_query(req: RagQueryRequest):
+    try:
+        return rag_pipeline.query(user_query=req.query, top_k=req.top_k)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/rag/status")
+async def rag_status():
+    return rag_pipeline.status()
