@@ -15,25 +15,91 @@ export default function GraphVisualization({ graph }: Props) {
   const [hover, setHover] = useState<string | null>(null);
 
   const positions = useMemo<Record<string, Pos>>(() => {
-    // Layout nodes in concentric layers based on group
     const W = 720;
     const H = 360;
-    const groups: Record<number, string[]> = {};
-    graph.nodes.forEach((n) => {
-      groups[n.group] = groups[n.group] || [];
-      groups[n.group].push(n.id);
-    });
-    const groupKeys = Object.keys(groups).map(Number).sort();
+    const nodes = graph.nodes;
+    const edges = graph.edges;
+
+    if (nodes.length === 0) return {};
+
+    // 1. Initialize node positions in a circle to prevent overlap
     const pos: Record<string, Pos> = {};
-    const colW = W / (groupKeys.length + 1);
-    groupKeys.forEach((g, gi) => {
-      const arr = groups[g];
-      const x = colW * (gi + 1);
-      arr.forEach((id, i) => {
-        const y = (H / (arr.length + 1)) * (i + 1);
-        pos[id] = { x, y };
-      });
+    nodes.forEach((n, i) => {
+      const angle = (i / nodes.length) * 2 * Math.PI;
+      const radius = 80 + Math.random() * 30;
+      pos[n.id] = {
+        x: W / 2 + radius * Math.cos(angle),
+        y: H / 2 + radius * Math.sin(angle),
+      };
     });
+
+    // 2. Simple force-directed relaxation simulation (120 iterations)
+    const iterations = 120;
+    const k = Math.sqrt((W * H) / (nodes.length || 1)) * 0.8;
+
+    for (let iter = 0; iter < iterations; iter++) {
+      const disp: Record<string, { x: number; y: number }> = {};
+      nodes.forEach((n) => {
+        disp[n.id] = { x: 0, y: 0 };
+      });
+
+      // Repulsion force between all node pairs
+      for (let i = 0; i < nodes.length; i++) {
+        const u = nodes[i];
+        for (let j = i + 1; j < nodes.length; j++) {
+          const v = nodes[j];
+          const dx = pos[u.id].x - pos[v.id].x;
+          const dy = pos[u.id].y - pos[v.id].y;
+          const dist = Math.sqrt(dx * dx + dy * dy) || 1.0;
+          if (dist < 150) {
+            const force = (k * k) / dist;
+            disp[u.id].x += (dx / dist) * force;
+            disp[u.id].y += (dy / dist) * force;
+            disp[v.id].x -= (dx / dist) * force;
+            disp[v.id].y -= (dy / dist) * force;
+          }
+        }
+      }
+
+      // Attraction force along connected edges
+      edges.forEach((e) => {
+        const u = e.source;
+        const v = e.target;
+        if (!pos[u] || !pos[v]) return;
+        const dx = pos[u].x - pos[v].x;
+        const dy = pos[u].y - pos[v].y;
+        const dist = Math.sqrt(dx * dx + dy * dy) || 1.0;
+        const force = (dist * dist) / k;
+        disp[u].x -= (dx / dist) * force * 0.5;
+        disp[u].y -= (dy / dist) * force * 0.5;
+        disp[v].x += (dx / dist) * force * 0.5;
+        disp[v].y += (dy / dist) * force * 0.5;
+      });
+
+      // Gravity towards container center
+      nodes.forEach((n) => {
+        const dx = pos[n.id].x - W / 2;
+        const dy = pos[n.id].y - H / 2;
+        const dist = Math.sqrt(dx * dx + dy * dy) || 1.0;
+        disp[n.id].x -= (dx / dist) * 0.05 * dist;
+        disp[n.id].y -= (dy / dist) * 0.05 * dist;
+      });
+
+      // Update positions with capped displacement and viewport constraints
+      const maxDisplacement = 15;
+      nodes.forEach((n) => {
+        const d = disp[n.id];
+        const dist = Math.sqrt(d.x * d.x + d.y * d.y) || 1.0;
+        const cappedDist = Math.min(maxDisplacement, dist);
+        pos[n.id].x += (d.x / dist) * cappedDist;
+        pos[n.id].y += (d.y / dist) * cappedDist;
+
+        // Constraint within SVG borders
+        pos[n.id].x = Math.max(35, Math.min(W - 35, pos[n.id].x));
+        pos[n.id].y = Math.max(35, Math.min(H - 35, pos[n.id].y));
+      });
+    }
+
     return pos;
   }, [graph]);
 
