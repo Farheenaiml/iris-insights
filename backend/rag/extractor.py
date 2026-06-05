@@ -1,7 +1,7 @@
 import os
 import json
 from typing import List, Dict, Any, Tuple
-from groq import Groq
+from groq import Groq  # type: ignore
 
 class MedicalExtractor:
     def __init__(self):
