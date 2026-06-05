@@ -101,17 +101,18 @@ async def handle_query(
     mime_type = ""
 
     # Process file if provided
+    temp_pipeline = None
     if file:
         file_bytes = await file.read()
         mime_type = file.content_type
         
+        extracted_text = ""
         if mime_type.startswith("image/"):
             is_image = True
             base64_image = base64.b64encode(file_bytes).decode("utf-8")
         elif mime_type == "application/pdf":
             try:
                 reader = PyPDF2.PdfReader(BytesIO(file_bytes))
-                extracted_text = ""
                 for page in reader.pages:
                     extracted_text += page.extract_text() + "\n"
                 
@@ -131,6 +132,50 @@ async def handle_query(
                 context += f"\n\nExtracted Text File Content:\n{extracted_text}"
             except Exception as e:
                 print(f"Failed to read text file: {e}")
+
+        # Index text content dynamically
+        if extracted_text.strip() and not is_image:
+            try:
+                print(f"Dynamically indexing uploaded file ({len(extracted_text)} chars)...")
+                # Create a temporary index directory specifically for this request
+                temp_index_dir = os.path.join(os.path.dirname(__file__), f"temp_index_{int(time.time())}")
+                temp_pipeline = RAGPipeline(index_dir=temp_index_dir)
+                
+                # Chunk the text
+                from rag.chunker import chunk_documents
+                pseudo_docs = [{
+                    "pmid": "uploaded_doc",
+                    "text": extracted_text,
+                    "metadata": {
+                        "pmid": "uploaded_doc",
+                        "source": file.filename
+                    }
+                }]
+                chunked_docs = chunk_documents(pseudo_docs, chunk_size=300, overlap=50)
+                
+                # Add to Vector Store
+                texts = [doc["text"] for doc in chunked_docs]
+                for doc in chunked_docs:
+                    doc["metadata"]["text"] = doc["text"]
+                metadatas = [doc["metadata"] for doc in chunked_docs]
+                
+                embeddings = temp_pipeline.embedding_model.embed_texts(texts)
+                temp_pipeline.vector_store.add_embeddings(embeddings, metadatas)
+                
+                # Add to Graph Store (limit to first 8 chunks to keep it fast)
+                for chunk in chunked_docs[:8]:
+                    try:
+                        entities, relations = temp_pipeline.extractor.extract_triples_from_text(chunk["text"])
+                        for ent in entities:
+                            temp_pipeline.graph_store.add_node(ent["name"], ent.get("type", "Entity"))
+                        for rel in relations:
+                            temp_pipeline.graph_store.add_edge(rel["source"], rel["target"], rel["type"])
+                    except Exception as e:
+                        print(f"Temp graph extraction failed: {e}")
+                
+                temp_pipeline.graph_store.save()
+            except Exception as e:
+                print(f"Failed to dynamically index uploaded file: {e}")
 
     # Web search
     if tavily_client and not is_image: # Skip search for pure image analysis usually, but let's allow it if there's a strong query
@@ -179,6 +224,9 @@ async def handle_query(
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error communicating with Groq: {str(e)}")
 
+    # Determine which pipeline to query (temp file-based or global database)
+    active_pipeline = temp_pipeline if temp_pipeline else rag_pipeline
+
     # 2. VectorRAG Pipeline
     try:
         if is_image:
@@ -189,7 +237,7 @@ async def handle_query(
             vr_cost = 0.0
             vr_chunks = 0
         else:
-            rag_res = rag_pipeline.query(user_query=query, top_k=5)
+            rag_res = active_pipeline.query(user_query=query, top_k=5)
             vr_answer = rag_res["answer"]
             vr_time = rag_res["metrics"]["latency_ms"]
             p_tokens = rag_res["metrics"]["token_usage"]["prompt_tokens"]
@@ -205,12 +253,55 @@ async def handle_query(
         vr_cost = 0.0
         vr_chunks = 0
 
-    # 3. GraphRAG Pipeline (Dummy for now, to be implemented next)
-    # We use some dummy math based on baseline to make the comparison UI work temporarily
-    grTokens = int(baseline_tokens * 0.4) if baseline_tokens > 0 else 720
-    grTime = int(baseline_time * 0.35) if baseline_time > 0 else 1450
-    grCost = baseline_cost * 0.4 if baseline_cost > 0 else 0.0162
+    # 3. GraphRAG Pipeline (Actual Implementation)
+    try:
+        if is_image:
+            gr_answer = "Graph RAG not supported for images."
+            gr_tokens = 0
+            gr_time = 0
+            gr_cost = 0.0
+            gr_reasoning = ["Image queries bypass graph search"]
+            gr_graph = GraphData(nodes=[], edges=[])
+        else:
+            gr_res = active_pipeline.query_graph_rag(user_query=query)
+            gr_answer = gr_res["answer"]
+            gr_time = gr_res["metrics"]["latency_ms"]
+            p_tokens = gr_res["metrics"]["token_usage"]["prompt_tokens"]
+            c_tokens = gr_res["metrics"]["token_usage"]["completion_tokens"]
+            gr_tokens = p_tokens + c_tokens
+            gr_cost = (p_tokens * 0.05 / 1000000) + (c_tokens * 0.08 / 1000000)
+            gr_reasoning = gr_res["reasoning_path"]
+            gr_graph = GraphData(
+                nodes=[GraphNode(id=n["id"], group=n["group"]) for n in gr_res["graph"]["nodes"]],
+                edges=[GraphEdge(source=e["source"], target=e["target"], highlight=e.get("highlight", False)) for e in gr_res["graph"]["edges"]]
+            )
+    except Exception as e:
+        print(f"Graph RAG failed: {e}")
+        gr_answer = f"Graph RAG failed: {str(e)}"
+        gr_tokens = 0
+        gr_time = 0
+        gr_cost = 0.0
+        gr_reasoning = [f"Failed: {str(e)}"]
+        gr_graph = GraphData(nodes=[], edges=[])
+
+    # Clean up temp index folder if created
+    if temp_pipeline:
+        try:
+            import shutil
+            shutil.rmtree(temp_pipeline.index_dir, ignore_errors=True)
+        except Exception as e:
+            print(f"Failed to delete temp index dir: {e}")
+
+    # Calculate savings compared to Baseline
+    tokens_saved_pct = round(((baseline_tokens - gr_tokens) / baseline_tokens) * 100) if baseline_tokens > 0 else 0
+    time_saved_pct = round(((baseline_time - gr_time) / baseline_time) * 100) if baseline_time > 0 else 0
+    cost_saved_pct = round(((baseline_cost - gr_cost) / baseline_cost) * 100) if baseline_cost > 0 else 0
     
+    # Ensure they are not negative in case of anomalies
+    tokens_saved_pct = max(0, tokens_saved_pct)
+    time_saved_pct = max(0, time_saved_pct)
+    cost_saved_pct = max(0, cost_saved_pct)
+
     return QueryResponse(
         query=query,
         baseline=BaselineResponse(
@@ -227,29 +318,17 @@ async def handle_query(
             retrievedChunks=vr_chunks
         ),
         graphrag=GraphRAGResponse(
-            answer=f"[GraphRAG Placeholder] This will eventually be the enhanced answer for: '{query}' using graph context. The graph approach is currently under construction.",
-            tokens=grTokens,
-            responseTime=grTime,
-            cost=round(grCost, 6),
-            reasoningPath=[
-                "Step 1: Extract entities (Pending)",
-                "Step 2: Query TigerGraph (Pending)",
-                "Step 3: Generate enhanced response (Pending)"
-            ],
-            graph=GraphData(
-                nodes=[
-                    {"id": "Entity A", "group": 0},
-                    {"id": "Entity B", "group": 1}
-                ],
-                edges=[
-                    {"source": "Entity A", "target": "Entity B", "highlight": True}
-                ]
-            )
+            answer=gr_answer,
+            tokens=gr_tokens,
+            responseTime=gr_time,
+            cost=round(gr_cost, 6),
+            reasoningPath=gr_reasoning,
+            graph=gr_graph
         ),
         comparison=Comparison(
-            tokensSavedPct=round(((baseline_tokens - grTokens) / baseline_tokens) * 100) if baseline_tokens > 0 else 0,
-            timeSavedPct=round(((baseline_time - grTime) / baseline_time) * 100) if baseline_time > 0 else 0,
-            costSavedPct=round(((baseline_cost - grCost) / baseline_cost) * 100) if baseline_cost > 0 else 0
+            tokensSavedPct=tokens_saved_pct,
+            timeSavedPct=time_saved_pct,
+            costSavedPct=cost_saved_pct
         )
     )
 

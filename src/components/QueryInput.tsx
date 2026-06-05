@@ -8,9 +8,9 @@ interface Props {
 }
 
 const SUGGESTIONS = [
-  "Why are floods frequent in Mumbai?",
-  "How does photosynthesis affect climate?",
-  "What caused the 2008 financial crisis?",
+  "How does Dermabond compare to sutures for closing laparoscopic trocar sites?",
+  "What was the effect of bucindolol in the BEST trial?",
+  "Does REM sleep consolidate semantic priming for emotional cue words?",
 ];
 
 export default function QueryInput({ onSubmit, loading }: Props) {

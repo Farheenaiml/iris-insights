@@ -17,7 +17,7 @@ class Generator:
         context_text = "\n\n".join([f"Chunk {i+1}:\n{c['text']}" for i, c in enumerate(context_chunks)])
         
         system_prompt = (
-            "You are a medical AI assistant. Answer the user's query using ONLY the provided context. "
+            "You are a helpful AI assistant. Answer the user's query using ONLY the provided context. "
             "If the answer is not contained in the context, say 'I cannot answer this based on the provided context.'\n\n"
             f"CONTEXT:\n{context_text}"
         )

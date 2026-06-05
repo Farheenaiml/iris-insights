@@ -1,0 +1,534 @@
+{
+  "nodes": [
+    {
+      "id": "Dermabond",
+      "attributes": {
+        "label": "treatment",
+        "group": 1
+      }
+    },
+    {
+      "id": "Subcuticular sutures",
+      "attributes": {
+        "label": "treatment",
+        "group": 1
+      }
+    },
+    {
+      "id": "Laparoscopic trocar sites",
+      "attributes": {
+        "label": "condition",
+        "group": 2
+      }
+    },
+    {
+      "id": "3.7 minutes",
+      "attributes": {
+        "label": "metric",
+        "group": 3
+      }
+    },
+    {
+      "id": "14.0 minutes",
+      "attributes": {
+        "label": "metric",
+        "group": 3
+      }
+    },
+    {
+      "id": "$198 USD",
+      "attributes": {
+        "label": "metric",
+        "group": 3
+      }
+    },
+    {
+      "id": "$497 USD",
+      "attributes": {
+        "label": "metric",
+        "group": 3
+      }
+    },
+    {
+      "id": "Wound complications",
+      "attributes": {
+        "label": "condition",
+        "group": 2
+      }
+    },
+    {
+      "id": "Subcuticular seroma",
+      "attributes": {
+        "label": "condition",
+        "group": 2
+      }
+    },
+    {
+      "id": "Perindopril",
+      "attributes": {
+        "label": "drug",
+        "group": 1
+      }
+    },
+    {
+      "id": "Atenolol",
+      "attributes": {
+        "label": "drug",
+        "group": 1
+      }
+    },
+    {
+      "id": "Obese hypertensive patients",
+      "attributes": {
+        "label": "condition",
+        "group": 2
+      }
+    },
+    {
+      "id": "Left ventricular mass (LVM)",
+      "attributes": {
+        "label": "metric",
+        "group": 3
+      }
+    },
+    {
+      "id": "Glucose & insulin metabolism (GIM)",
+      "attributes": {
+        "label": "metric",
+        "group": 3
+      }
+    },
+    {
+      "id": "Regression of LVM",
+      "attributes": {
+        "label": "metric",
+        "group": 3
+      }
+    },
+    {
+      "id": "Worsened GIM profile",
+      "attributes": {
+        "label": "metric",
+        "group": 3
+      }
+    },
+    {
+      "id": "Bucindolol",
+      "attributes": {
+        "label": "drug",
+        "group": 1
+      }
+    },
+    {
+      "id": "Placebo",
+      "attributes": {
+        "label": "treatment",
+        "group": 1
+      }
+    },
+    {
+      "id": "Chronic heart failure (CHF)",
+      "attributes": {
+        "label": "condition",
+        "group": 2
+      }
+    },
+    {
+      "id": "Sympatholysis",
+      "attributes": {
+        "label": "condition",
+        "group": 2
+      }
+    },
+    {
+      "id": "Increased risk of death",
+      "attributes": {
+        "label": "condition",
+        "group": 2
+      }
+    },
+    {
+      "id": "Systemic venous norepinephrine",
+      "attributes": {
+        "label": "metric",
+        "group": 3
+      }
+    },
+    {
+      "id": "REM sleep",
+      "attributes": {
+        "label": "condition",
+        "group": 2
+      }
+    },
+    {
+      "id": "NREM sleep",
+      "attributes": {
+        "label": "condition",
+        "group": 2
+      }
+    },
+    {
+      "id": "Semantic priming",
+      "attributes": {
+        "label": "metric",
+        "group": 3
+      }
+    },
+    {
+      "id": "Associational breadth",
+      "attributes": {
+        "label": "metric",
+        "group": 3
+      }
+    },
+    {
+      "id": "Emotional cue words",
+      "attributes": {
+        "label": "value",
+        "group": 3
+      }
+    },
+    {
+      "id": "Personal formulary training",
+      "attributes": {
+        "label": "treatment",
+        "group": 1
+      }
+    },
+    {
+      "id": "Existing formulary training",
+      "attributes": {
+        "label": "treatment",
+        "group": 1
+      }
+    },
+    {
+      "id": "Prescribing competency",
+      "attributes": {
+        "label": "metric",
+        "group": 3
+      }
+    },
+    {
+      "id": "23% score increase",
+      "attributes": {
+        "label": "metric",
+        "group": 3
+      }
+    },
+    {
+      "id": "19% score increase",
+      "attributes": {
+        "label": "metric",
+        "group": 3
+      }
+    },
+    {
+      "id": "Classic medical curriculum",
+      "attributes": {
+        "label": "condition",
+        "group": 2
+      }
+    }
+  ],
+  "edges": [
+    {
+      "source": "Dermabond",
+      "target": "Subcuticular sutures",
+      "key": "compared_to",
+      "attributes": {
+        "relation": "compared_to",
+        "weight": 1.0
+      }
+    },
+    {
+      "source": "Dermabond",
+      "target": "Laparoscopic trocar sites",
+      "key": "used_for_closure_of",
+      "attributes": {
+        "relation": "used_for_closure_of",
+        "weight": 1.0
+      }
+    },
+    {
+      "source": "Dermabond",
+      "target": "3.7 minutes",
+      "key": "has_average_closure_time",
+      "attributes": {
+        "relation": "has_average_closure_time",
+        "weight": 1.0
+      }
+    },
+    {
+      "source": "Dermabond",
+      "target": "$198 USD",
+      "key": "has_average_closure_cost",
+      "attributes": {
+        "relation": "has_average_closure_cost",
+        "weight": 1.0
+      }
+    },
+    {
+      "source": "Dermabond",
+      "target": "Wound complications",
+      "key": "causes_same_rate_as_sutures",
+      "attributes": {
+        "relation": "causes_same_rate_as_sutures",
+        "weight": 1.0
+      }
+    },
+    {
+      "source": "Subcuticular sutures",
+      "target": "Laparoscopic trocar sites",
+      "key": "used_for_closure_of",
+      "attributes": {
+        "relation": "used_for_closure_of",
+        "weight": 1.0
+      }
+    },
+    {
+      "source": "Subcuticular sutures",
+      "target": "14.0 minutes",
+      "key": "has_average_closure_time",
+      "attributes": {
+        "relation": "has_average_closure_time",
+        "weight": 1.0
+      }
+    },
+    {
+      "source": "Subcuticular sutures",
+      "target": "$497 USD",
+      "key": "has_average_closure_cost",
+      "attributes": {
+        "relation": "has_average_closure_cost",
+        "weight": 1.0
+      }
+    },
+    {
+      "source": "Wound complications",
+      "target": "Subcuticular seroma",
+      "key": "includes",
+      "attributes": {
+        "relation": "includes",
+        "weight": 1.0
+      }
+    },
+    {
+      "source": "Perindopril",
+      "target": "Atenolol",
+      "key": "compared_to",
+      "attributes": {
+        "relation": "compared_to",
+        "weight": 1.0
+      }
+    },
+    {
+      "source": "Perindopril",
+      "target": "Obese hypertensive patients",
+      "key": "used_to_treat",
+      "attributes": {
+        "relation": "used_to_treat",
+        "weight": 1.0
+      }
+    },
+    {
+      "source": "Perindopril",
+      "target": "Regression of LVM",
+      "key": "leads_to",
+      "attributes": {
+        "relation": "leads_to",
+        "weight": 1.0
+      }
+    },
+    {
+      "source": "Perindopril",
+      "target": "Glucose & insulin metabolism (GIM)",
+      "key": "does_not_affect",
+      "attributes": {
+        "relation": "does_not_affect",
+        "weight": 1.0
+      }
+    },
+    {
+      "source": "Atenolol",
+      "target": "Obese hypertensive patients",
+      "key": "used_to_treat",
+      "attributes": {
+        "relation": "used_to_treat",
+        "weight": 1.0
+      }
+    },
+    {
+      "source": "Atenolol",
+      "target": "Left ventricular mass (LVM)",
+      "key": "has_no_effect_on",
+      "attributes": {
+        "relation": "has_no_effect_on",
+        "weight": 1.0
+      }
+    },
+    {
+      "source": "Atenolol",
+      "target": "Worsened GIM profile",
+      "key": "leads_to",
+      "attributes": {
+        "relation": "leads_to",
+        "weight": 1.0
+      }
+    },
+    {
+      "source": "Regression of LVM",
+      "target": "Left ventricular mass (LVM)",
+      "key": "improves",
+      "attributes": {
+        "relation": "improves",
+        "weight": 1.0
+      }
+    },
+    {
+      "source": "Worsened GIM profile",
+      "target": "Glucose & insulin metabolism (GIM)",
+      "key": "degrades",
+      "attributes": {
+        "relation": "degrades",
+        "weight": 1.0
+      }
+    },
+    {
+      "source": "Bucindolol",
+      "target": "Placebo",
+      "key": "compared_to",
+      "attributes": {
+        "relation": "compared_to",
+        "weight": 1.0
+      }
+    },
+    {
+      "source": "Bucindolol",
+      "target": "Chronic heart failure (CHF)",
+      "key": "used_to_treat",
+      "attributes": {
+        "relation": "used_to_treat",
+        "weight": 1.0
+      }
+    },
+    {
+      "source": "Bucindolol",
+      "target": "Sympatholysis",
+      "key": "causes_in_subset",
+      "attributes": {
+        "relation": "causes_in_subset",
+        "weight": 1.0
+      }
+    },
+    {
+      "source": "Bucindolol",
+      "target": "Systemic venous norepinephrine",
+      "key": "reduces",
+      "attributes": {
+        "relation": "reduces",
+        "weight": 1.0
+      }
+    },
+    {
+      "source": "Sympatholysis",
+      "target": "Increased risk of death",
+      "key": "leads_to",
+      "attributes": {
+        "relation": "leads_to",
+        "weight": 1.0
+      }
+    },
+    {
+      "source": "REM sleep",
+      "target": "Semantic priming",
+      "key": "selectively_consolidates",
+      "attributes": {
+        "relation": "selectively_consolidates",
+        "weight": 1.0
+      }
+    },
+    {
+      "source": "REM sleep",
+      "target": "Associational breadth",
+      "key": "enhances",
+      "attributes": {
+        "relation": "enhances",
+        "weight": 1.0
+      }
+    },
+    {
+      "source": "NREM sleep",
+      "target": "Semantic priming",
+      "key": "does_not_consolidate",
+      "attributes": {
+        "relation": "does_not_consolidate",
+        "weight": 1.0
+      }
+    },
+    {
+      "source": "Semantic priming",
+      "target": "Emotional cue words",
+      "key": "occurs_for",
+      "attributes": {
+        "relation": "occurs_for",
+        "weight": 1.0
+      }
+    },
+    {
+      "source": "Personal formulary training",
+      "target": "Existing formulary training",
+      "key": "compared_to",
+      "attributes": {
+        "relation": "compared_to",
+        "weight": 1.0
+      }
+    },
+    {
+      "source": "Personal formulary training",
+      "target": "23% score increase",
+      "key": "leads_to_competency_gain",
+      "attributes": {
+        "relation": "leads_to_competency_gain",
+        "weight": 1.0
+      }
+    },
+    {
+      "source": "Personal formulary training",
+      "target": "Classic medical curriculum",
+      "key": "highly_effective_in",
+      "attributes": {
+        "relation": "highly_effective_in",
+        "weight": 1.0
+      }
+    },
+    {
+      "source": "Existing formulary training",
+      "target": "19% score increase",
+      "key": "leads_to_competency_gain",
+      "attributes": {
+        "relation": "leads_to_competency_gain",
+        "weight": 1.0
+      }
+    },
+    {
+      "source": "23% score increase",
+      "target": "Prescribing competency",
+      "key": "improves",
+      "attributes": {
+        "relation": "improves",
+        "weight": 1.0
+      }
+    },
+    {
+      "source": "19% score increase",
+      "target": "Prescribing competency",
+      "key": "improves",
+      "attributes": {
+        "relation": "improves",
+        "weight": 1.0
+      }
+    }
+  ]
+}
