@@ -20,8 +20,10 @@ class MedicalGraphStore:
         groups = {
             "treatment": 1,
             "drug": 1,
+            "subject": 1,
             "condition": 2,
             "disease": 2,
+            "action": 2,
             "metric": 3,
             "value": 3,
             "entity": 0
