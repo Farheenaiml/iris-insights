@@ -54,28 +54,24 @@ const Index = () => {
       <main className="container mx-auto py-12 md:py-20 space-y-12">
         <QueryInput onSubmit={handleSubmit} loading={loading} />
 
-        {submitted && (
+        <ComparisonCards data={data} loading={loading} />
+
+        {submitted && data && !loading && (
           <motion.section
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.5 }}
             className="space-y-8"
           >
-            <ComparisonCards data={data} loading={loading} />
-
-            {data && !loading && (
-              <>
-                <MetricsDashboard data={data} />
-                <div className="grid lg:grid-cols-5 gap-6">
-                  <div className="lg:col-span-3">
-                    <GraphVisualization graph={data.graphrag.graph} />
-                  </div>
-                  <div className="lg:col-span-2">
-                    <ReasoningPanel paths={data.graphrag.reasoningPath} />
-                  </div>
-                </div>
-              </>
-            )}
+            <MetricsDashboard data={data} />
+            <div className="grid lg:grid-cols-5 gap-6">
+              <div className="lg:col-span-3">
+                <GraphVisualization graph={data.graphrag.graph} />
+              </div>
+              <div className="lg:col-span-2">
+                <ReasoningPanel paths={data.graphrag.reasoningPath} />
+              </div>
+            </div>
           </motion.section>
         )}
       </main>

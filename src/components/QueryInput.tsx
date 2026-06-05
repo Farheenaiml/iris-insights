@@ -100,18 +100,7 @@ export default function QueryInput({ onSubmit, loading }: Props) {
         </div>
       </form>
 
-      <div className="mt-5 flex flex-wrap items-center justify-center gap-2">
-        <span className="text-xs text-muted-foreground">Try:</span>
-        {SUGGESTIONS.map((s) => (
-          <button
-            key={s}
-            onClick={() => !loading && setValue(s)}
-            className="text-xs px-3 py-1.5 rounded-full glass hover:border-primary/40 transition-colors text-muted-foreground hover:text-foreground"
-          >
-            {s}
-          </button>
-        ))}
-      </div>
+
     </motion.section>
   );
 }
