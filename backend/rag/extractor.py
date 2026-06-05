@@ -19,8 +19,7 @@ class MedicalExtractor:
             return [w.strip(",.?()\"'") for w in query.split() if len(w) > 4]
 
         prompt = (
-            "You are a medical entity extractor. Identify the key medical terms, drug names, treatments, "
-            "procedures, or conditions in the user's query.\n"
+            "Identify the key entities, subjects, topics, terms, or concepts in the user's query.\n"
             "Return them as a simple comma-separated list of strings. Do not include any explanation or extra text.\n\n"
             f"Query: {query}\n"
             "Entities:"
@@ -50,12 +49,12 @@ class MedicalExtractor:
             return [], []
 
         prompt = (
-            "You are an advanced medical knowledge graph builder. "
-            "Extract key entities and their relationships from the medical text below.\n"
+            "You are an advanced knowledge graph builder. "
+            "Extract key entities and their relationships from the text below.\n"
             "Represent the relationships clearly as (source, relation, target) triples.\n\n"
             "Rules:\n"
-            "1. Entities should be concise names (e.g. 'Dermabond', 'Subcuticular sutures', 'Laparoscopic trocar sites', 'Mean closure time', 'Mean cost').\n"
-            "2. Relations should be lowercase verbs/prepositions (e.g. 'compared_to', 'has_closure_time', 'used_for', 'reduces', 'costs').\n"
+            "1. Entities should be concise names (e.g. 'Dermabond', 'Apex Corporation', 'Q1 2026 revenue', 'Mean closure time').\n"
+            "2. Relations should be lowercase verbs/prepositions (e.g. 'compared_to', 'increased_by', 'used_for', 'reduces', 'costs').\n"
             "3. Format your response strictly as a JSON object with keys 'entities' and 'relations'. "
             "Do not include markdown tags like ```json or any other text before/after.\n\n"
             "Format example:\n"
