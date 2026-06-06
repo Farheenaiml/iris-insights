@@ -39,7 +39,8 @@ export async function runComparison(query: string, file?: File): Promise<QueryRe
       formData.append('file', file);
     }
 
-    const response = await fetch('http://localhost:8000/api/query', {
+    const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+    const response = await fetch(`${baseUrl}/api/query`, {
       method: 'POST',
       body: formData,
     });
